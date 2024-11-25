@@ -1,0 +1,20 @@
+/* src/index.css */
+
+/* Import Tailwind CSS Base styles */
+@tailwind base;
+
+/* Import Tailwind CSS Component styles */
+@tailwind components;
+
+/* Import Tailwind CSS Utility classes */
+@tailwind utilities;
+
+/* You can add any custom global styles below if needed */
+
+/* Example: Custom styles */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #121212; /* Example of setting a background */
+}
+
+/* You can add custom fonts or tweak Tailwind's theme here if needed */
