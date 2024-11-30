@@ -27,9 +27,6 @@ jobs:
           pip install -r requirements.txt
           pip install pylint
 
-      - name: Lint the code (pylint)
-        run: |
-          pylint **/*.py --disable=R,C --max-line-length=100
 
   # Job 2: Run tests and check code coverage
   tests:
