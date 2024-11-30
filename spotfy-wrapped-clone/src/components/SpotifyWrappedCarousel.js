@@ -13,7 +13,7 @@ function SpotifyWrappedCarousel({ slides, onSlideClick }) {
     <Carousel responsive={responsive}>
       {slides.map((slide) => (
         <div
-          key={slide.id}
+          key={slide.id} // Use a unique key for each slide
           className="p-4 cursor-pointer"
           onClick={() => onSlideClick(slide)}
         >

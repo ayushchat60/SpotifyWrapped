@@ -19,9 +19,20 @@ class Artist(models.Model):
     description = models.TextField(blank=True, null=True)
     song_preview = models.URLField(blank=True, null=True)
 
+class Track(models.Model):
+    name = models.CharField(max_length=255)
+    artist = models.CharField(max_length=255)
+    album = models.CharField(max_length=255)
+    preview_url = models.URLField(null=True, blank=True)
+    track_url = models.URLField()
+
+    def __str__(self):
+        return self.name
+    
 class WrappedHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     image = models.URLField(blank=True, null=True)  # Use 'image' instead of 'image_url'
     artists = models.ManyToManyField(Artist)
     created_at = models.DateTimeField(auto_now_add=True)
+    tracks = models.ManyToManyField(Track) 

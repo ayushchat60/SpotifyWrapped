@@ -6,9 +6,15 @@ function Home() {
   const [profileData, setProfileData] = useState(null);
   const [slides, setSlides] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem("theme") === "dark");
   const navigate = useNavigate();
 
-  // Fetch profile data and Wrapped history on component load
+  // Apply dark or light theme based on `isDarkMode`
+  useEffect(() => {
+    document.body.classList.toggle("dark", isDarkMode);
+    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+  }, [isDarkMode]);
+
   useEffect(() => {
     const fetchProfileAndHistory = async () => {
       try {
@@ -50,36 +56,39 @@ function Home() {
     fetchProfileAndHistory();
   }, [navigate]);
 
-  // Generate Spotify Wrapped data
   const generateWrapped = async (term) => {
     if (!profileData?.spotify_linked) {
       alert("Please link your Spotify account first.");
       return;
     }
-  
+
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}spotify/wrapped-data/${term}/`,
         {
-          method: "GET", // Use the correct backend method
+          method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         }
       );
-  
+
       if (response.ok) {
         const data = await response.json();
-  
-        // Create a single summary slide
+        console.log("Spotify Wrapped Data:", data);
+
+        const imageUrl = data[0]?.images[0]?.url || "https://via.placeholder.com/300";
+
         const newSlide = {
           id: `wrapped-${Date.now()}`, // Unique ID for this Wrapped summary
           title: `${term.charAt(0).toUpperCase() + term.slice(1)}-Term Wrapped`,
-          image: data[0]?.images[0]?.url || "https://via.placeholder.com/300",
+          image: imageUrl, // Use the image URL from the data
           fullData: data, // Pass all artist details for the next page
+          tracks: data.tracks,
+          artists: data.artists // Ensure artists are passed here
         };
-  
-        setSlides((prevSlides) => [...prevSlides, newSlide]); // Add the Wrapped summary slide
+
+        setSlides((prevSlides) => [...prevSlides, newSlide]);
         alert(`Generated ${term}-term Wrapped successfully!`);
       } else {
         alert("Failed to generate Wrapped.");
@@ -110,6 +119,39 @@ function Home() {
       alert("An error occurred while linking Spotify.");
     }
   };
+  
+  const handleDeleteAccount = async () => {
+    const token = localStorage.getItem("accessToken");  // Assuming the token is stored here
+  
+    if (!token) {
+      alert("You must be logged in to delete your account.");
+      return;
+    }
+  
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/users/delete/', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,  // Include the token
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (response.ok) {
+        alert("Account deleted successfully.");
+        localStorage.removeItem("accessToken");  // Clear token
+        window.location.href = '/login';  // Redirect to login page
+      } else {
+        alert("Failed to delete account.");
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert("An error occurred while deleting your account.");
+    }
+  };
+  const toggleDarkMode = () => {
+    setIsDarkMode((prevMode) => !prevMode);
+  };
 
   return (
     <div className="flex h-screen w-screen bg-spotifyBlack text-white overflow-hidden">
@@ -132,11 +174,39 @@ function Home() {
             Medium-Term Wrapped
           </button>
           <button
-            className="w-full py-2 px-4 bg-spotifyGreen text-black font-bold rounded hover:bg-spotifyGreenHover transition"
+            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-black font-bold rounded hover:bg-spotifyGreenHover transition"
             onClick={() => generateWrapped("long")}
           >
             Long-Term Wrapped
           </button>
+          <button
+            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-black font-bold rounded hover:bg-spotifyGreenHover transition"
+            onClick={() => generateWrapped("christmas")}
+          >
+            Christmas Wrapped
+          </button>
+          <button
+            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-black font-bold rounded hover:bg-spotifyGreenHover transition"
+            onClick={() => generateWrapped("halloween")}
+          >
+            Halloween Wrapped
+          </button>
+          <div className="flex-grow mt-4">
+            <button
+              className="w-full py-2 px-4 bg-spotifyGreen text-black font-bold rounded hover:bg-spotifyRedHover transition"
+              onClick={() => navigate("/game")}
+            >
+              Play a Game
+            </button>
+          </div>
+          <div className="mt-4">
+            <button
+              className="w-full py-2 px-4 bg-spotifyGreen text-black font-bold rounded hover:bg-spotifyYellowHover transition"
+              onClick={() => navigate("/contact")}
+            >
+              Contact Developers
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -167,6 +237,18 @@ function Home() {
                 >
                   Link Spotify
                 </button>
+                <button
+                  className="w-full px-4 py-2 text-white hover:bg-spotifyGreen hover:text-black transition"
+                  onClick={handleDeleteAccount}
+                >
+                  Delete Account
+                </button>
+                <button
+                  className="w-full px-4 py-2 text-white hover:bg-spotifyGreen hover:text-black transition"
+                  onClick={toggleDarkMode}
+                >
+                  Toggle {isDarkMode ? "Light" : "Dark"} Mode
+                </button>
               </div>
             )}
           </div>
@@ -177,7 +259,7 @@ function Home() {
           <SpotifyWrappedCarousel
             slides={slides}
             onSlideClick={(slide) => {
-              navigate(`/wrapped-detail/${slide.id}`, { state: { fullData: slide.artists } });
+              navigate(`/wrapped-detail/${slide.id}`, { state: slide });
             }}
           />
         </div>

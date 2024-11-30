@@ -18,11 +18,17 @@ function Login() {
       // Store tokens in localStorage
       localStorage.setItem("accessToken", response.data.access);
       localStorage.setItem("refreshToken", response.data.refresh);
+
+      // Set the default Authorization header for all future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`;
+
       alert("Login successful!");
       navigate("/"); // Redirect to home page
     } catch (err) {
       console.error(err);
       alert("Invalid credentials! Please try again.");
+      localStorage.removeItem("accessToken"); // Clear token on failure
+      localStorage.removeItem("refreshToken");
     } finally {
       setLoading(false);
     }
@@ -73,5 +79,5 @@ function Login() {
     </div>
   );
 }
-export default Login;
 
+export default Login;
