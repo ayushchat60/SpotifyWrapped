@@ -1,11 +1,9 @@
 import os
-import json
 import requests
 import logging
 from datetime import timedelta
 from urllib.parse import urlencode
 from django.utils.timezone import now
-from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
@@ -18,9 +16,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
 from .models import SpotifyToken, WrappedHistory, Artist, Track
 from .serializers import RegisterSerializer
-
-#Configure logging
-logger = logging.getLogger(__name__)
 
 # Load environment variables
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
@@ -437,10 +432,7 @@ def delete_account(request):
     user = request.user
 
     try:
-        logger.info(f"Attempting to delete user account: {user.username}")
         user.delete()
-        logger.info(f"User account deleted successfully: {user.username}")
         return Response({"message": "User account deleted successfully."}, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f"Error deleting user account: {str(e)}")
         return Response({"error": f"Failed to delete account: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
