@@ -122,14 +122,6 @@ function WrappedDetail() {
           Next
         </button>
       </div>
-
-      {/* Make Public Button */}
-      <button
-        onClick={makePublic}
-        className="fixed bottom-4 right-4 px-6 py-3 bg-spotifyGreen text-black font-bold rounded-full hover:bg-spotifyGreenHover transition"
-      >
-        Make Public
-      </button>
     </div>
   );
 }

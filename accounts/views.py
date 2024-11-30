@@ -1,33 +1,38 @@
 import os
 import json
+import requests
+import logging
 from datetime import timedelta
 from urllib.parse import urlencode
-
 from django.utils.timezone import now
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
-
 from .models import SpotifyToken, WrappedHistory, Artist, Track
-from .serializers import RegisterSerializer, WrappedHistorySerializer
-import logging
+from .serializers import RegisterSerializer
+
+#Configure logging
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
 SPOTIFY_REDIRECT_URI = os.getenv('SPOTIFY_REDIRECT_URI')
 
+
 class RegisterView(APIView):
+    """
+    Handles user registration by accepting a POST request with user data,
+    validating it, and saving the user to the database.
+    """
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -36,6 +41,10 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
+    """
+    Handles user login by accepting a POST request with username and password.
+    If the credentials are correct, a JWT access and refresh token are returned.
+    """
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
@@ -49,6 +58,10 @@ class LoginView(APIView):
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class UserProfileView(APIView):
+    """
+    Retrieves the authenticated user's profile information, such as username,
+    email, and whether their Spotify account is linked.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -60,6 +73,10 @@ class UserProfileView(APIView):
         })
 
 class SpotifyAuthView(APIView):
+    """
+    Provides the URL for the Spotify authentication process.
+    This URL allows the user to link their Spotify account to the app.
+    """
     def get(self, request):
         # Generate Spotify Authorization URL
         url = (
@@ -71,6 +88,10 @@ class SpotifyAuthView(APIView):
         return Response({"url": url}, status=status.HTTP_200_OK)
     
 class ProtectedView(APIView):
+    """
+    A protected view that requires the user to be authenticated.
+    Returns a message if the user is authenticated.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -78,6 +99,10 @@ class ProtectedView(APIView):
     
 
 class SpotifyCallbackView(APIView):
+    """
+    Handles the Spotify callback when the user authorizes the app to access their Spotify data.
+    The authorization code is exchanged for an access token and refresh token.
+    """
     def post(self, request):
         # Ensure the user is authenticated
 
@@ -127,6 +152,10 @@ class SpotifyCallbackView(APIView):
         return Response({"message": "Spotify account linked successfully"}, status=200)
 
 class FetchSpotifyWrappedView(APIView):
+    """
+    Fetches the user's top Spotify artists for a given time period (short, medium, long).
+    Requires the user to be authenticated and their Spotify account to be linked.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, term):
@@ -160,6 +189,9 @@ class FetchSpotifyWrappedView(APIView):
             return Response({"error": "Failed to fetch Spotify data."}, status=response.status_code)
     
 class SpotifyAuthURLView(APIView):
+    """
+    Provides a URL for Spotify authentication with the appropriate scopes.
+    """
     def get(self, request):
         params = {
             "client_id": SPOTIFY_CLIENT_ID,  # Your Spotify client ID
@@ -171,6 +203,9 @@ class SpotifyAuthURLView(APIView):
         return Response({"url": url}, status=200)
     
 class SpotifyLinkCheckView(APIView):
+    """
+    Checks if the authenticated user has linked their Spotify account.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -182,6 +217,10 @@ class SpotifyLinkCheckView(APIView):
     
 
 class SpotifyWrappedDataView(APIView):
+    """
+    Fetches and stores the user's Spotify wrapped data (top artists and tracks)
+    for a specific term (short, medium, long, christmas, halloween).
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, term):
@@ -391,9 +430,6 @@ def get_user_tracks(request, term):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-
-#Configure logging
-logger = logging.getLogger(__name__)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])

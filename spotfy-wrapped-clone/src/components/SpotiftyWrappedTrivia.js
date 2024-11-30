@@ -134,7 +134,7 @@ function SpotifyWrappedTrivia() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-spotifyBlack text-white p-6 relative animate__animated animate__fadeIn">
       <button
-        onClick={() => navigate("/home")}
+        onClick={() => navigate("/")}
         className="absolute top-4 left-4 text-white bg-transparent hover:bg-spotifyGreen p-2 rounded-full transition-all duration-300"
       >
         &lt; Back
