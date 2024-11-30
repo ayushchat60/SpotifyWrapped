@@ -1,6 +1,7 @@
 import os
 import requests
 import logging
+from dotenv import load_dotenv
 from datetime import timedelta
 from urllib.parse import urlencode
 from django.utils.timezone import now
@@ -18,6 +19,7 @@ from .models import SpotifyToken, WrappedHistory, Artist, Track
 from .serializers import RegisterSerializer
 
 # Load environment variables
+load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
 SPOTIFY_REDIRECT_URI = os.getenv('SPOTIFY_REDIRECT_URI')
