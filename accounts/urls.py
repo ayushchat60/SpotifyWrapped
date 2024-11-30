@@ -1,6 +1,6 @@
 # accounts/urls.py
 from django.urls import path
-from .views import RegisterView, LoginView, SpotifyAuthView, SpotifyCallbackView, FetchSpotifyWrappedView, SpotifyAuthURLView, ProtectedView, SpotifyLinkCheckView, SpotifyWrappedDataView, UserProfileView, WrappedHistoryView
+from .views import RegisterView, SpotifyAuthView, SpotifyCallbackView, FetchSpotifyWrappedView, SpotifyAuthURLView, ProtectedView, SpotifyLinkCheckView, SpotifyWrappedDataView, UserProfileView, WrappedHistoryView, get_user_tracks, delete_account
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -16,4 +16,6 @@ urlpatterns = [
     path('spotify/auth-url/', SpotifyAuthURLView.as_view(), name='spotify-auth-url'),
     path("spotify/link-check/", SpotifyLinkCheckView.as_view(), name="spotify-link-check"),
     path("spotify/wrapped-history/", WrappedHistoryView.as_view(), name="wrapped-history"),
+    path('spotify/user-tracks/<str:term>/', get_user_tracks, name='user-tracks'),
+    path('users/delete/', delete_account, name='delete_account'),
 ]

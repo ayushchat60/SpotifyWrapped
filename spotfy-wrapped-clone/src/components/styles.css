@@ -1,0 +1,90 @@
+/* Default to light theme */
+body.light {
+    background-color: #f0f0f0; /* Light background color */
+    color: #333333; /* Dark text for contrast */
+  }
+  
+  body.dark {
+    background-color: #121212; /* Dark background color */
+    color: #ffffff; /* Light text for contrast */
+  }
+  
+  /* Specific theme styles */
+  body.dark .bg-spotifyDark {
+    background-color: #181818; /* Darker background for Spotify elements */
+  }
+  
+  body.light .bg-spotifyDark {
+    background-color: #ffffff; /* Lighter background for Spotify elements */
+  }
+  
+  body.dark .text-spotifyGreen {
+    color: #1db954; /* Green color for dark theme */
+  }
+  
+  body.light .text-spotifyGreen {
+    color: #1db954; /* Green color for light theme */
+  }
+  
+  body.dark .text-white {
+    color: #ffffff; /* White text for dark theme */
+  }
+  
+  body.light .text-black {
+    color: #333333; /* Dark text for light theme */
+  }
+  
+  /* Adjust button styles for each theme */
+  button.bg-spotifyGreen {
+    background-color: #1db954; /* Green button for both themes */
+  }
+  
+  button.bg-spotifyGreen:hover {
+    background-color: #1ed760; /* Lighter green on hover */
+  }
+  
+  body.dark .bg-spotifyGreen {
+    background-color: #1db954; /* Keep green button in dark theme */
+  }
+  
+  body.light .bg-spotifyGreen {
+    background-color: #1db954; /* Keep green button in light theme */
+  }
+  
+  body.dark .bg-spotifyGreen:hover {
+    background-color: #1ed760; /* Lighter green on hover */
+  }
+  
+  body.light .bg-spotifyGreen:hover {
+    background-color: #1ed760; /* Lighter green on hover */
+  }
+  
+  button.bg-spotifyRedHover:hover {
+    background-color: #e60000; /* Hover effect for red button */
+  }
+  
+  body.dark .bg-spotifyYellowHover:hover {
+    background-color: #f7df1e; /* Hover effect for yellow button */
+  }
+  
+  body.light .bg-spotifyYellowHover:hover {
+    background-color: #f7df1e; /* Hover effect for yellow button */
+  }
+  
+  .bg-spotifyBlack {
+    background-color: #121212; /* Dark background */
+  }
+  
+  .bg-spotifyWhite {
+    background-color: #ffffff; /* Light background */
+  }
+  
+  /* Adjust sidebar for each theme */
+  body.dark .bg-spotifyDark {
+    background-color: #181818;
+  }
+  
+  body.light .bg-spotifyDark {
+    background-color: #f4f4f4;
+  }
+  
