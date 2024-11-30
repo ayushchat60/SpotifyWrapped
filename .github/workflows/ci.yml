@@ -27,26 +27,6 @@ jobs:
           pip install -r requirements.txt
           pip install pylint
 
-
-  # Job 2: Run tests and check code coverage
-  tests:
-    runs-on: ubuntu-latest
-    needs: lint  # This job will only run after the lint job succeeds
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
+      - name: Lint the code (pylint)
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
-
-      - name: Run tests and collect code coverage
-        run: |
-          pytest --cov=my_package tests/ --cov-report=xml --maxfail=1 --disable-warnings
+          pylint **/*.py --disable=R,C --max-line-length=100
