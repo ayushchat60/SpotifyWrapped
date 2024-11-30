@@ -12,6 +12,7 @@ function Home() {
   // Apply dark or light theme based on `isDarkMode`
   useEffect(() => {
     document.body.classList.toggle("dark", isDarkMode);
+    document.body.classList.toggle("light", !isDarkMode);
     localStorage.setItem("theme", isDarkMode ? "dark" : "light");
   }, [isDarkMode]);
 
@@ -149,6 +150,7 @@ function Home() {
       alert("An error occurred while deleting your account.");
     }
   };
+
   const toggleDarkMode = () => {
     setIsDarkMode((prevMode) => !prevMode);
   };
