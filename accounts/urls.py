@@ -1,6 +1,6 @@
 # accounts/urls.py
 from django.urls import path
-from .views import RegisterView, LoginView, SpotifyAuthView, SpotifyCallbackView, FetchSpotifyWrappedView, SpotifyAuthURLView, ProtectedView, SpotifyLinkCheckView, SpotifyWrappedDataView, UserProfileView, WrappedHistoryView, get_user_tracks, delete_account
+from .views import RegisterView, SpotifyAuthView, SpotifyCallbackView, FetchSpotifyWrappedView, SpotifyAuthURLView, ProtectedView, SpotifyLinkCheckView, SpotifyWrappedDataView, UserProfileView, WrappedHistoryView, get_user_tracks, delete_account
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [

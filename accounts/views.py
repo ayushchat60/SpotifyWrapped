@@ -1,46 +1,26 @@
 import os
+import json
 from datetime import timedelta
-from django.utils.timezone import now
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth import authenticate
-from .serializers import RegisterSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
-import requests
-from .models import SpotifyToken  # Ensure this model is defined in your app
-from rest_framework.permissions import IsAuthenticated
-from django.conf import settings
 from urllib.parse import urlencode
-from .models import WrappedHistory, Artist
-from rest_framework.decorators import api_view
-from django.views.decorators.csrf import csrf_exempt
-from .serializers import WrappedHistorySerializer
-from rest_framework.permissions import IsAuthenticated
+
+from django.utils.timezone import now
+from django.conf import settings
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from django.http import JsonResponse
-import os
-from datetime import timedelta
-from django.utils.timezone import now
-from .models import SpotifyToken, WrappedHistory, Artist, Track  # Assume Track model exists
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-
-from django.shortcuts import render
-from django.views import View
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework import status
-import logging
 
-import json
+from .models import SpotifyToken, WrappedHistory, Artist, Track
+from .serializers import RegisterSerializer, WrappedHistorySerializer
+import logging
 
 # Load environment variables
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
