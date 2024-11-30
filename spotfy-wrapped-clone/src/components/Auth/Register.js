@@ -1,11 +1,29 @@
-import React, { useState } from "react";
 import axios from "axios";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Register Component
+ *
+ * This component renders a registration form that allows new users to create an account
+ * by providing their username, email, and password. On successful registration, the user
+ * is redirected to the login page.
+ *
+ * Features:
+ * - Form inputs for username, email, and password.
+ * - Handles form submission via an API call to register the user.
+ * - Navigation to the login page after successful registration.
+ */
 function Register() {
-  const [formData, setFormData] = useState({ username: "", email: "", password: "" });
+  const [formData, setFormData] = useState({ username: "", email: "", password: "" }); // State for form data
   const navigate = useNavigate();
 
+  /**
+   * Handles the registration process.
+   *
+   * @param {Object} e - The event object for the form submission.
+   * @returns {Promise<void>}
+   */
   const handleRegister = async (e) => {
     e.preventDefault();
     try {

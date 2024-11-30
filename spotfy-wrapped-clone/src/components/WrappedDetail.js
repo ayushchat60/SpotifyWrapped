@@ -1,40 +1,59 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
+/**
+ * WrappedDetail Component
+ *
+ * This component displays detailed information about a specific Spotify Wrapped artist.
+ * Users can navigate between artists, play audio previews, and make their Wrapped history public.
+ *
+ * Features:
+ * - Displays detailed artist information including name, top song, description, and image.
+ * - Allows navigation between artists using Next and Previous buttons.
+ * - Plays an audio preview of the artist's top song if available.
+ * - Provides a button to make the Wrapped history public.
+ *
+ * State:
+ * - currentIndex: Tracks the index of the currently displayed artist.
+ * - currentArtist: Stores the details of the currently displayed artist.
+ * - audioRef: Ref for managing the audio element.
+ * - audioLoaded: Indicates if the audio has been loaded and is ready to play.
+ * - trackId: Stores the ID of the current artist's top song for audio preview.
+ *
+ * Props (from React Router):
+ * - wrapped_id: The ID of the Wrapped history (from URL parameters).
+ * - artists: Array of artist objects passed via location.state.
+ */
 function WrappedDetail() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { wrapped_id } = useParams(); // Extract wrapped_id from URL using useParams()
+  const { wrapped_id } = useParams(); // Extract wrapped_id from URL
   const { artists } = location.state || {};
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentArtist, setCurrentArtist] = useState(artists ? artists[currentIndex] : {});
-  const [audioRef, setAudioRef] = useState(null);
-  const [audioLoaded, setAudioLoaded] = useState(false);
-  const [trackId, setTrackId] = useState(null);
+  const [audioRef, setAudioRef] = useState(null); // Ref for audio element
+  const [audioLoaded, setAudioLoaded] = useState(false); // Tracks audio load state
+  const [trackId, setTrackId] = useState(null); // ID for top song preview
 
+  // Update trackId based on the current artist
   useEffect(() => {
     if (artists && artists[currentIndex]) {
       const currentArtist = artists[currentIndex];
-      if (Array.isArray(currentArtist.song_preview) && currentArtist.song_preview.length > 0) {
-        const song = currentArtist.song_preview[0];
-        setTrackId(currentArtist.top_song_id);
-      } else if (currentArtist.song_preview) {
+      if (currentArtist.song_preview) {
         setTrackId(currentArtist.top_song_id);
       }
     }
   }, [currentIndex, artists]);
 
-  const handleNext = () => setCurrentIndex((prevIndex) => (prevIndex === artists.length - 1 ? 0 : prevIndex + 1));
-  const handlePrev = () => setCurrentIndex((prevIndex) => (prevIndex === 0 ? artists.length - 1 : prevIndex - 1));
-  const handleBack = () => navigate(-1);
-
+  // Update current artist when the index changes
   useEffect(() => {
     if (artists && artists[currentIndex]) {
       setCurrentArtist(artists[currentIndex]);
     }
   }, [currentIndex, artists]);
 
+  // Play audio when it is loaded
   useEffect(() => {
     if (audioLoaded && audioRef) {
       audioRef.play();
@@ -42,19 +61,46 @@ function WrappedDetail() {
     }
   }, [audioRef, audioLoaded]);
 
-  const makePublic = async () => {
-    const response = await fetch(`/api/wrapped/make-public/${wrapped_id}/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
+  /**
+   * Handles navigation to the next artist.
+   */
+  const handleNext = () =>
+    setCurrentIndex((prevIndex) => (prevIndex === artists.length - 1 ? 0 : prevIndex + 1));
 
-    if (response.ok) {
-      alert('Wrapped history made public!');
-    } else {
-      alert('Error making Wrapped public');
+  /**
+   * Handles navigation to the previous artist.
+   */
+  const handlePrev = () =>
+    setCurrentIndex((prevIndex) => (prevIndex === 0 ? artists.length - 1 : prevIndex - 1));
+
+  /**
+   * Handles navigation back to the previous page.
+   */
+  const handleBack = () => navigate(-1);
+
+  /**
+   * Makes the current Wrapped history public.
+   *
+   * Sends a POST request to the backend API to make the Wrapped history public.
+   */
+  const makePublic = async () => {
+    try {
+      const response = await fetch(`/api/wrapped/make-public/${wrapped_id}/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.ok) {
+        alert("Wrapped history made public!");
+      } else {
+        alert("Error making Wrapped public");
+      }
+    } catch (error) {
+      console.error("Error making Wrapped public:", error);
+      alert("An error occurred while making the Wrapped public.");
     }
   };
 

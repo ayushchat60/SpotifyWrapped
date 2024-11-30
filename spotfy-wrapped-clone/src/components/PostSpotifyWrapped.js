@@ -1,9 +1,33 @@
-import React, { useState } from 'react';
 import axios from 'axios';
+import React, { useState } from 'react';
 
+/**
+ * PostSpotifyWrapped Component
+ *
+ * This component displays a user's Spotify Wrapped summary, including top artists and tracks.
+ * It allows the user to make their Spotify Wrapped summary public.
+ *
+ * Props:
+ * - wrapped: An object containing details of the Spotify Wrapped summary.
+ *   - id: The unique ID of the Wrapped summary.
+ *   - title: The title of the Wrapped summary.
+ *   - image_url: The URL of the image for the Wrapped summary.
+ *   - artists: An array of the top artists for the Wrapped summary.
+ *   - tracks: An array of the top tracks for the Wrapped summary.
+ *   - public: A boolean indicating if the Wrapped summary is public.
+ *
+ * Features:
+ * - Displays the Wrapped title, image, top artists, and top tracks.
+ * - Allows the user to make the Wrapped public with a button click.
+ */
 function PostSpotifyWrapped({ wrapped }) {
-  const [isPublic, setIsPublic] = useState(wrapped.public);
+  const [isPublic, setIsPublic] = useState(wrapped.public); // Tracks if the Wrapped summary is public
 
+  /**
+   * Makes the Spotify Wrapped summary public by sending a POST request to the API.
+   *
+   * @returns {Promise<void>}
+   */
   const handleMakePublic = async () => {
     try {
       const response = await axios.post(`/api/wrapped/make-public/${wrapped.id}/`, {}, {

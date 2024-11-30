@@ -1,12 +1,31 @@
-import React, { useState } from "react";
 import axios from "axios";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Login Component
+ *
+ * This component renders a login form that allows users to authenticate
+ * by providing their username and password. On successful login, tokens
+ * are stored in localStorage and the user is redirected to the home page.
+ *
+ * Features:
+ * - Form inputs for username and password.
+ * - Loading state management to prevent multiple submissions.
+ * - Error handling for invalid credentials.
+ * - Navigation to the registration page if the user doesn't have an account.
+ */
 function Login() {
-  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [formData, setFormData] = useState({ username: "", password: "" }); // State for form data
   const [loading, setLoading] = useState(false); // To handle loading state
   const navigate = useNavigate();
 
+  /**
+   * Handles the login process.
+   *
+   * @param {Object} e - The event object for the form submission.
+   * @returns {Promise<void>}
+   */
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -20,7 +39,7 @@ function Login() {
       localStorage.setItem("refreshToken", response.data.refresh);
 
       // Set the default Authorization header for all future requests
-      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
 
       alert("Login successful!");
       navigate("/"); // Redirect to home page

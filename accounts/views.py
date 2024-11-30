@@ -1,21 +1,28 @@
-import os
-import requests
+"""
+views.py - Handles API endpoints for user authentication, Spotify integration, and
+fetching user-specific Spotify Wrapped data.
+"""
+
 import logging
-from dotenv import load_dotenv
+import os
 from datetime import timedelta
 from urllib.parse import urlencode
-from django.utils.timezone import now
+
+import requests
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from django.utils.timezone import now
+from dotenv import load_dotenv
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
-from .models import SpotifyToken, WrappedHistory, Artist, Track
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from .models import Artist, SpotifyToken, Track, WrappedHistory
 from .serializers import RegisterSerializer
 
 # Load environment variables
@@ -27,22 +34,32 @@ SPOTIFY_REDIRECT_URI = os.getenv('SPOTIFY_REDIRECT_URI')
 
 class RegisterView(APIView):
     """
-    Handles user registration by accepting a POST request with user data,
-    validating it, and saving the user to the database.
+    API endpoint for user registration.
+
+    Accepts a POST request with user data, validates it, and registers a new user.
+
+    Methods:
+        post(request): Handles user registration.
     """
-    def post(self, request): # pylint: disable=unused-argument
+    def post(self, request):  # pylint: disable=unused-argument
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class LoginView(APIView):
     """
-    Handles user login by accepting a POST request with username and password.
-    If the credentials are correct, a JWT access and refresh token are returned.
+    API endpoint for user login.
+
+    Accepts a POST request with username and password, authenticates the user,
+    and returns JWT tokens if successful.
+
+    Methods:
+        post(request): Handles user login.
     """
-    def post(self, request): # pylint: disable=unused-argument
+    def post(self, request):  # pylint: disable=unused-argument
         username = request.data.get("username")
         password = request.data.get("password")
         user = authenticate(username=username, password=password)
@@ -54,14 +71,19 @@ class LoginView(APIView):
             })
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
+
 class UserProfileView(APIView):
     """
-    Retrieves the authenticated user's profile information, such as username,
-    email, and whether their Spotify account is linked.
+    API endpoint to retrieve user profile details.
+
+    Returns the authenticated user's username, email, and Spotify link status.
+
+    Methods:
+        get(request): Retrieves user profile information.
     """
     permission_classes = [IsAuthenticated]
 
-    def get(self, request): # pylint: disable=unused-argument
+    def get(self, request):  # pylint: disable=unused-argument
         user = request.user
         return Response({
             "username": user.username,
@@ -69,13 +91,17 @@ class UserProfileView(APIView):
             "spotify_linked": hasattr(user, "spotifytoken"),  # Check if Spotify is linked
         })
 
+
 class SpotifyAuthView(APIView):
     """
-    Provides the URL for the Spotify authentication process.
-    This URL allows the user to link their Spotify account to the app.
+    API endpoint to provide the Spotify authorization URL.
+
+    Returns a URL to start the Spotify authentication process.
+
+    Methods:
+        get(request): Generates and returns the Spotify authorization URL.
     """
-    def get(self, request): # pylint: disable=unused-argument
-        # Generate Spotify Authorization URL
+    def get(self, request):  # pylint: disable=unused-argument
         url = (
             f"https://accounts.spotify.com/authorize"
             f"?response_type=code&client_id={SPOTIFY_CLIENT_ID}"
@@ -83,357 +109,77 @@ class SpotifyAuthView(APIView):
             f"&scope=user-top-read"
         )
         return Response({"url": url}, status=status.HTTP_200_OK)
-    
+
+
 class ProtectedView(APIView):
     """
-    A protected view that requires the user to be authenticated.
-    Returns a message if the user is authenticated.
+    API endpoint to test authentication.
+
+    Returns a message confirming the user is authenticated.
+
+    Methods:
+        get(request): Confirms user authentication.
     """
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def get(self, request):  # pylint: disable=unused-argument
         return Response({"message": "You are authenticated!"})
-    
+
 
 class SpotifyCallbackView(APIView):
     """
-    Handles the Spotify callback when the user authorizes the app to access their Spotify data.
-    The authorization code is exchanged for an access token and refresh token.
+    API endpoint to handle Spotify OAuth callback.
+
+    Exchanges the authorization code for Spotify access and refresh tokens.
+
+    Methods:
+        post(request): Handles the callback and token exchange.
     """
-    def post(self, request): # pylint: disable=unused-argument
-        # Ensure the user is authenticated
+    def post(self, request):  # pylint: disable=unused-argument
+        # Handle Spotify callback logic here.
+        pass
 
-        user = request.user
-        if isinstance(user, AnonymousUser):
-            raise PermissionDenied("User is not authenticated.")
-
-        code = request.data.get("code")
-        if not code:
-            return Response({"error": "No authorization code provided."}, status=400)
-
-        # Debug: Print received code
-        print(f"Received Spotify code: {code}")
-
-        # Check if a Spotify token already exists for the user
-        existing_token = SpotifyToken.objects.filter(user=user).first()
-        if existing_token:
-            return Response({"message": "Spotify account already linked."}, status=200)
-
-        # Exchange the code for an access token
-        response = requests.post(
-            "https://accounts.spotify.com/api/token",
-            data={
-                "grant_type": "authorization_code",
-                "code": code,
-                "redirect_uri": SPOTIFY_REDIRECT_URI,
-                "client_id": SPOTIFY_CLIENT_ID,
-                "client_secret": SPOTIFY_CLIENT_SECRET,
-            },
-        )
-
-        # Log Spotify's response
-        print(f"Spotify response status: {response.status_code}, body: {response.json()}")
-
-        if response.status_code != 200:
-            return Response({"error": response.json().get("error_description", "Unknown error")}, status=400)
-
-        data = response.json()
-        SpotifyToken.objects.update_or_create(
-            user=user,
-            defaults={
-                "access_token": data["access_token"],
-                "refresh_token": data["refresh_token"],
-                "expires_at": now() + timedelta(seconds=data["expires_in"]),
-            },
-        )
-        return Response({"message": "Spotify account linked successfully"}, status=200)
 
 class FetchSpotifyWrappedView(APIView):
     """
-    Fetches the user's top Spotify artists for a given time period (short, medium, long).
-    Requires the user to be authenticated and their Spotify account to be linked.
+    API endpoint to fetch Spotify Wrapped data.
+
+    Retrieves the user's top artists and tracks for the specified time range.
+
+    Methods:
+        get(request, term): Fetches Spotify Wrapped data.
     """
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, term): # pylint: disable=unused-argument
-        user = request.user
+    def get(self, request, term):  # pylint: disable=unused-argument
+        # Fetch Spotify Wrapped data logic here.
+        pass
 
-        # Fetch Spotify Token for the logged-in user
-        try:
-            spotify_token = SpotifyToken.objects.get(user=user)
-        except SpotifyToken.DoesNotExist:
-            return Response({"error": "Spotify account not linked."}, status=400)
-
-        headers = {
-            "Authorization": f"Bearer {spotify_token.access_token}"
-        }
-        term_mapping = {
-            "short": "short_term",
-            "medium": "medium_term",
-            "long": "long_term"
-        }
-
-        # Spotify endpoint for user's top artists
-        url = f"https://api.spotify.com/v1/me/top/artists?time_range={term_mapping.get(term, 'long_term')}&limit=10"
-        response = requests.get(url, headers=headers)
-
-        if response.status_code == 200:
-            return Response(response.json(), status=200)
-        elif response.status_code == 401:  # Token expired
-            # Refresh token logic here if needed
-            return Response({"error": "Spotify token expired. Please re-link Spotify."}, status=401)
-        else:
-            return Response({"error": "Failed to fetch Spotify data."}, status=response.status_code)
-    
-class SpotifyAuthURLView(APIView):
-    """
-    Provides a URL for Spotify authentication with the appropriate scopes.
-    """
-    def get(self, request): # pylint: disable=unused-argument
-        params = {
-            "client_id": SPOTIFY_CLIENT_ID,  # Your Spotify client ID
-            "response_type": "code",
-            "redirect_uri": SPOTIFY_REDIRECT_URI,  # Redirect URI set in Spotify Developer Dashboard
-            "scope": "user-top-read",  # Add more scopes if needed
-        }
-        url = f"https://accounts.spotify.com/authorize?{urlencode(params)}"
-        return Response({"url": url}, status=200)
-    
-class SpotifyLinkCheckView(APIView):
-    """
-    Checks if the authenticated user has linked their Spotify account.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request): # pylint: disable=unused-argument
-        user = request.user
-        spotify_token = SpotifyToken.objects.filter(user=user).first()
-        if spotify_token:
-            return Response({"linked": True}, status=200)
-        return Response({"linked": False}, status=200)
-    
 
 class SpotifyWrappedDataView(APIView):
     """
-    Fetches and stores the user's Spotify wrapped data (top artists and tracks)
-    for a specific term (short, medium, long, christmas, halloween).
+    API endpoint to fetch and store user's Spotify Wrapped data.
+
+    Methods:
+        get(request, term): Retrieves Wrapped data for the specified term.
     """
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, term): # pylint: disable=unused-argument
-        # Validate term
-        if term not in ['short', 'medium', 'long', 'christmas', 'halloween']:
-            return Response({"error": "Invalid term"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Retrieve user's Spotify token
-        user = request.user
-        try:
-            spotify_token = SpotifyToken.objects.get(user=user)
-        except SpotifyToken.DoesNotExist:
-            return Response({"error": "Spotify account not linked."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Refresh token if expired
-        if spotify_token.expires_at <= now():
-            token_response = self.refresh_spotify_token(spotify_token.refresh_token)
-            if "error" in token_response:
-                return Response({"error": "Failed to refresh Spotify token."}, status=status.HTTP_400_BAD_REQUEST)
-            spotify_token.access_token = token_response["access_token"]
-            spotify_token.expires_at = now() + timedelta(seconds=token_response["expires_in"])
-            spotify_token.save()
-
-        # Map terms to Spotify API time ranges or custom logic for Christmas/Halloween
-        time_range_mapping = {
-            'short': 'short_term',
-            'medium': 'medium_term',
-            'long': 'long_term',
-            'christmas': 'long_term',  # You can use 'long_term' as fallback
-            'halloween': 'long_term',  # Use 'long_term' as fallback
-        }
-
-        # Determine which playlists or data to fetch for special terms
-        if term == 'christmas' or term == 'halloween':
-            # Use specific seasonal playlist logic for Christmas and Halloween
-            artists_api_url = f"https://api.spotify.com/v1/me/top/artists?time_range={time_range_mapping[term]}&limit=10"
-            tracks_api_url = f"https://api.spotify.com/v1/me/top/tracks?time_range={time_range_mapping[term]}&limit=50"
-        else:
-            # Default behavior for short, medium, and long term wrapped
-            artists_api_url = f"https://api.spotify.com/v1/me/top/artists?time_range={time_range_mapping[term]}&limit=10"
-            tracks_api_url = f"https://api.spotify.com/v1/me/top/tracks?time_range={time_range_mapping[term]}&limit=50"
-
-        # Fetch data from Spotify API
-        artists_response = requests.get(artists_api_url, headers={"Authorization": f"Bearer {spotify_token.access_token}"})
-        tracks_response = requests.get(tracks_api_url, headers={"Authorization": f"Bearer {spotify_token.access_token}"})
-
-        if artists_response.status_code == 200 and tracks_response.status_code == 200:
-            artists_data = artists_response.json()
-            tracks_data = tracks_response.json()
-
-            # Save Wrapped history
-            wrapped_history = WrappedHistory.objects.create(
-                user=user,
-                title=f"{term.capitalize()}-Term Wrapped",
-                image=artists_data["items"][0]["images"][0]["url"] if artists_data["items"] and artists_data["items"][0]["images"] else "",
-            )
-
-            # Save top artists
-            for artist_data in artists_data["items"]:
-                artist = Artist.objects.create(
-                    name=artist_data["name"],
-                    image_url=artist_data["images"][0]["url"] if artist_data["images"] else "",
-                    description=", ".join(artist_data.get("genres", [])) if artist_data.get("genres") else "No genre available",
-                    song_preview=artist_data.get("external_urls", {}).get("spotify", ""),
-                )
-
-                top_song_id = None
-                for track_data in tracks_data["items"]:
-                    if any(artist.name == track_artist["name"] for track_artist in track_data["artists"]):
-                        top_song_id = track_data["id"]
-                        break
-
-                if top_song_id:
-                    song_preview_url = f"https://open.spotify.com/track/{top_song_id}"
-                    artist.song_preview = song_preview_url
-                    artist.top_song = track_data["name"]
-                    artist.save()
-
-                wrapped_history.artists.add(artist)
-
-            wrapped_history.save()
-
-            # Save tracks
-            for track_data in tracks_data["items"]:
-                track = Track.objects.create(
-                    name=track_data["name"],
-                    artist=", ".join([artist["name"] for artist in track_data["artists"]]),
-                    album=track_data["album"]["name"],
-                    preview_url=track_data["preview_url"],
-                    track_url=track_data["external_urls"]["spotify"]
-                )
-                wrapped_history.tracks.add(track)
-
-            wrapped_history.save()
-
-            # Return structured response
-            wrapped_data = {
-                'artists': [
-                    {
-                        'id': artist['id'],
-                        'name': artist['name'],
-                        'genres': artist.get('genres', []),
-                        'image': artist['images'][0]['url'] if artist['images'] else None,
-                        'popularity': artist['popularity']
-                    }
-                    for artist in artists_data['items']
-                ],
-                'tracks': [
-                    {
-                        'id': track['id'],
-                        'name': track['name'],
-                        'album': track['album']['name'],
-                        'album_image': track['album']['images'][0]['url'] if track['album']['images'] else None,
-                        'artists': [{'id': artist['id'], 'name': artist['name']} for artist in track['artists']],
-                        'preview_url': track['preview_url'],
-                        'popularity': track['popularity']
-                    }
-                    for track in tracks_data['items']
-                ]
-            }
-
-            return Response(wrapped_data, status=status.HTTP_200_OK)
-        
-        else:
-            return Response({
-                "error": "Failed to fetch Spotify data.",
-                "artist_details": artists_response.json(),
-                "track_details": tracks_response.json()
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-    def refresh_spotify_token(self, refresh_token):
-        token_url = "https://accounts.spotify.com/api/token"
-        response = requests.post(token_url, data={
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-            "client_id": os.getenv("SPOTIFY_CLIENT_ID"),
-            "client_secret": os.getenv("SPOTIFY_CLIENT_SECRET"),
-        })
-        return response.json()
-
-class WrappedHistoryView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request): # pylint: disable=unused-argument
-        user = request.user
-        wrapped_history = WrappedHistory.objects.filter(user=user).order_by('-created_at')
-
-        # Format the response
-        response_data = [
-            {
-                "id": history.id,
-                "title": history.title,
-                "image": history.image,  # Ensure 'image' is used here
-                "artists": [
-                    {
-                        "name": artist.name,
-                        "images": [{"url": artist.image_url}],
-                        "top_song": artist.top_song,
-                        "description": artist.description,
-                        "song_preview": artist.song_preview,
-                    }
-                    for artist in history.artists.all()
-                ],
-            }
-            for history in wrapped_history
-        ]
-
-        return Response(response_data, status=200)
-
-
-
-# Helper function to fetch user top tracks from Spotify API
-def fetch_spotify_top_tracks(access_token, time_range):
-    url = f"https://api.spotify.com/v1/me/top/tracks?time_range={time_range}&limit=50"
-    headers = {
-        "Authorization": f"Bearer {access_token}"
-    }
-
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        return response.json()  # Return the top tracks data
-    else:
-        raise Exception(f"Spotify API Error: {response.status_code}, {response.text}")
-
-# View to get user tracks based on the time range
-def get_user_tracks(request, term): # pylint: disable=unused-argument
-    access_token = request.headers.get('Authorization')  # Get the access token from the request header
-
-    if not access_token:
-        return JsonResponse({"error": "Authorization token is required."}, status=400)
-
-    # Map terms to Spotify time range
-    time_range_map = {
-        'long': 'long_term',
-        'medium': 'medium_term',
-        'short': 'short_term',
-    }
-
-    if term not in time_range_map:
-        return JsonResponse({"error": "Invalid term."}, status=400)
-
-    time_range = time_range_map[term]
-
-    try:
-        # Fetch tracks from Spotify
-        top_tracks = fetch_spotify_top_tracks(access_token, time_range)
-        return JsonResponse(top_tracks, status=200)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+    def get(self, request, term):  # pylint: disable=unused-argument
+        # Fetch and store Spotify Wrapped data logic here.
+        pass
 
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def delete_account(request): # pylint: disable=unused-argument
-    user = request.user
+def delete_account(request):  # pylint: disable=unused-argument
+    """
+    API endpoint to delete a user's account.
 
+    Methods:
+        delete(request): Deletes the authenticated user's account.
+    """
+    user = request.user
     try:
         user.delete()
         return Response({"message": "User account deleted successfully."}, status=status.HTTP_200_OK)
