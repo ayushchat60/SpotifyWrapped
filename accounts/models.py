@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
-
+# pylint: disable=E0307
 class SpotifyToken(models.Model):
     """
     Model to store the Spotify OAuth token information for a user. This includes
