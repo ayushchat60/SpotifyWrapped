@@ -199,50 +199,143 @@ class SpotifyLinkCheckView(APIView):
         spotify_token = SpotifyToken.objects.filter(user=user).first()
         return Response({"linked": bool(spotify_token)}, status=200)
 
+    
 
 class SpotifyWrappedDataView(APIView):
     """
     Fetches and stores the user's Spotify wrapped data (top artists and tracks)
-    for a specified term (short, medium, long, christmas, halloween).
+    for a specific term (short, medium, long, christmas, halloween).
     """
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, term):  # pylint: disable=unused-argument
-        user = request.user
+    def get(self, request, term): # pylint: disable=unused-argument
+        # Validate term
+        if term not in ['short', 'medium', 'long', 'christmas', 'halloween']:
+            return Response({"error": "Invalid term"}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Retrieve user's Spotify token
+        user = request.user
         try:
             spotify_token = SpotifyToken.objects.get(user=user)
         except SpotifyToken.DoesNotExist:
-            return Response({"error": "Spotify account not linked."}, status=400)
+            return Response({"error": "Spotify account not linked."}, status=status.HTTP_400_BAD_REQUEST)
 
-        headers = {"Authorization": f"Bearer {spotify_token.access_token}"}
-        term_mapping = {"short": "short_term", "medium": "medium_term", "long": "long_term"}
+        # Refresh token if expired
+        if spotify_token.expires_at <= now():
+            token_response = self.refresh_spotify_token(spotify_token.refresh_token)
+            if "error" in token_response:
+                return Response({"error": "Failed to refresh Spotify token."}, status=status.HTTP_400_BAD_REQUEST)
+            spotify_token.access_token = token_response["access_token"]
+            spotify_token.expires_at = now() + timedelta(seconds=token_response["expires_in"])
+            spotify_token.save()
 
-        url = f"https://api.spotify.com/v1/me/top/artists?time_range={term_mapping.get(term, 'long_term')}&limit=10"
-        response = requests.get(url, headers=headers)
+        # Map terms to Spotify API time ranges or custom logic for Christmas/Halloween
+        time_range_mapping = {
+            'short': 'short_term',
+            'medium': 'medium_term',
+            'long': 'long_term',
+            'christmas': 'long_term',  # You can use 'long_term' as fallback
+            'halloween': 'medium_term',  # Use 'long_term' as fallback
+        }
 
-        if response.status_code == 200:
-            data = response.json()
-            wrapped_history = WrappedHistory.objects.create(user=user, title=f"{term.capitalize()} Term Wrapped")
-            for artist_data in data['items']:
-                artist, created = Artist.objects.get_or_create(
-                    spotify_id=artist_data['id'],
-                    defaults={
-                        'name': artist_data['name'],
-                        'image_url': artist_data['images'][0]['url'] if artist_data['images'] else '',
-                        'top_song': artist_data['top_song'] if 'top_song' in artist_data else '',
-                        'description': artist_data['description'] if 'description' in artist_data else '',
-                        'song_preview': artist_data['song_preview'] if 'song_preview' in artist_data else '',
-                    }
+        # Determine which playlists or data to fetch for special terms
+        if term == 'christmas' or term == 'halloween':
+            # Use specific seasonal playlist logic for Christmas and Halloween
+            artists_api_url = f"https://api.spotify.com/v1/me/top/artists?time_range={time_range_mapping[term]}&limit=10"
+            tracks_api_url = f"https://api.spotify.com/v1/me/top/tracks?time_range={time_range_mapping[term]}&limit=50"
+        else:
+            # Default behavior for short, medium, and long term wrapped
+            artists_api_url = f"https://api.spotify.com/v1/me/top/artists?time_range={time_range_mapping[term]}&limit=10"
+            tracks_api_url = f"https://api.spotify.com/v1/me/top/tracks?time_range={time_range_mapping[term]}&limit=50"
+
+        # Fetch data from Spotify API
+        artists_response = requests.get(artists_api_url, headers={"Authorization": f"Bearer {spotify_token.access_token}"})
+        tracks_response = requests.get(tracks_api_url, headers={"Authorization": f"Bearer {spotify_token.access_token}"})
+
+        if artists_response.status_code == 200 and tracks_response.status_code == 200:
+            artists_data = artists_response.json()
+            tracks_data = tracks_response.json()
+
+            # Save Wrapped history
+            wrapped_history = WrappedHistory.objects.create(
+                user=user,
+                title=f"{term.capitalize()}-Term Wrapped",
+                image=artists_data["items"][0]["images"][0]["url"] if artists_data["items"] and artists_data["items"][0]["images"] else "",
+            )
+
+            # Save top artists
+            for artist_data in artists_data["items"]:
+                artist = Artist.objects.create(
+                    name=artist_data["name"],
+                    image_url=artist_data["images"][0]["url"] if artist_data["images"] else "",
+                    description=", ".join(artist_data.get("genres", [])) if artist_data.get("genres") else "No genre available",
+                    song_preview=artist_data.get("external_urls", {}).get("spotify", ""),
                 )
+
+                top_song_id = None
+                for track_data in tracks_data["items"]:
+                    if any(artist.name == track_artist["name"] for track_artist in track_data["artists"]):
+                        top_song_id = track_data["id"]
+                        break
+
+                if top_song_id:
+                    song_preview_url = f"https://open.spotify.com/track/{top_song_id}"
+                    artist.song_preview = song_preview_url
+                    artist.top_song = track_data["name"]
+                    artist.save()
+
                 wrapped_history.artists.add(artist)
+
             wrapped_history.save()
-            return Response({"message": "Spotify wrapped data fetched and stored successfully"}, status=200)
-        elif response.status_code == 401:
-            return Response({"error": "Spotify token expired. Please re-link Spotify."}, status=401)
-        return Response({"error": "Failed to fetch Spotify data."}, status=response.status_code)
 
+            # Save tracks
+            for track_data in tracks_data["items"]:
+                track = Track.objects.create(
+                    name=track_data["name"],
+                    artist=", ".join([artist["name"] for artist in track_data["artists"]]),
+                    album=track_data["album"]["name"],
+                    preview_url=track_data["preview_url"],
+                    track_url=track_data["external_urls"]["spotify"]
+                )
+                wrapped_history.tracks.add(track)
 
+            wrapped_history.save()
+
+            # Return structured response
+            wrapped_data = {
+                'artists': [
+                    {
+                        'id': artist['id'],
+                        'name': artist['name'],
+                        'genres': artist.get('genres', []),
+                        'image': artist['images'][0]['url'] if artist['images'] else None,
+                        'popularity': artist['popularity']
+                    }
+                    for artist in artists_data['items']
+                ],
+                'tracks': [
+                    {
+                        'id': track['id'],
+                        'name': track['name'],
+                        'album': track['album']['name'],
+                        'album_image': track['album']['images'][0]['url'] if track['album']['images'] else None,
+                        'artists': [{'id': artist['id'], 'name': artist['name']} for artist in track['artists']],
+                        'preview_url': track['preview_url'],
+                        'popularity': track['popularity']
+                    }
+                    for track in tracks_data['items']
+                ]
+            }
+
+            return Response(wrapped_data, status=status.HTTP_200_OK)
+        
+        else:
+            return Response({
+                "error": "Failed to fetch Spotify data.",
+                "artist_details": artists_response.json(),
+                "track_details": tracks_response.json()
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
 class WrappedHistoryView(APIView):
     """
     Retrieves the Spotify wrapped history for the authenticated user.

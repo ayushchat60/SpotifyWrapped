@@ -78,32 +78,6 @@ function WrappedDetail() {
    */
   const handleBack = () => navigate(-1);
 
-  /**
-   * Makes the current Wrapped history public.
-   *
-   * Sends a POST request to the backend API to make the Wrapped history public.
-   */
-  const makePublic = async () => {
-    try {
-      const response = await fetch(`/api/wrapped/make-public/${wrapped_id}/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (response.ok) {
-        alert("Wrapped history made public!");
-      } else {
-        alert("Error making Wrapped public");
-      }
-    } catch (error) {
-      console.error("Error making Wrapped public:", error);
-      alert("An error occurred while making the Wrapped public.");
-    }
-  };
-
   return (
     <div className="h-screen w-screen bg-spotifyBlack text-white flex flex-col justify-center items-center relative">
       <button
