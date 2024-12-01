@@ -143,7 +143,7 @@ function SpotifyWrappedTrivia() {
 
   if (gameOver) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-spotifyBlack text-white py-8">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-spotifyWhite dark:bg-spotifyBlack text-spotifyGreen dark:text-white py-8">
         <h1 className="text-4xl font-bold mb-4 text-spotifyGreen animate__animated animate__fadeIn">
           Game Over!
         </h1>
@@ -152,13 +152,13 @@ function SpotifyWrappedTrivia() {
         </p>
         <button
           onClick={handleRestart}
-          className="py-2 px-6 mb-4 bg-spotifyGreen text-black rounded-lg hover:bg-spotifyGreenHover transition-all duration-300 transform hover:scale-105"
+          className="py-2 px-6 mb-4 bg-spotifyGreen text-white dark:text-black rounded-lg hover:bg-spotifyGreenHover transition-all duration-300 transform hover:scale-105"
         >
           Restart Game
         </button>
         <button
           onClick={() => navigate("/")}
-          className="py-2 px-6 bg-spotifyGreen text-black rounded-lg hover:bg-spotifyGreenHover transition-all duration-300 transform hover:scale-105"
+          className="py-2 px-6 bg-spotifyGreen text-white dark:text-black rounded-lg hover:bg-spotifyGreenHover transition-all duration-300 transform hover:scale-105"
         >
           Go Back to Home
         </button>
@@ -167,15 +167,15 @@ function SpotifyWrappedTrivia() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-spotifyBlack text-white p-6 relative animate__animated animate__fadeIn">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-spotifyWhite dark:bg-spotifyBlack text-spotifyGreen dark:text-white p-6 relative animate__animated animate__fadeIn">
       <button
         onClick={() => navigate("/")}
-        className="absolute top-4 left-4 text-white bg-transparent hover:bg-spotifyGreen p-2 rounded-full transition-all duration-300"
+        className="absolute top-4 left-4 text-spotifyGreen dark:text-white bg-transparent hover:bg-spotifyGreen p-2 rounded-full transition-all duration-300"
       >
         &lt; Back
       </button>
 
-      <div className="w-full max-w-xl bg-spotifyDark rounded-lg shadow-xl p-8 space-y-6 animate__animated animate__fadeIn animate__delay-1s">
+      <div className="w-full max-w-xl bg-spotifyLight: dark:bg-spotifyDark rounded-lg shadow-xl p-8 space-y-6 animate__animated animate__fadeIn animate__delay-1s">
         <h1 className="text-3xl font-bold mb-6 text-spotifyGreen">Spotify Wrapped Trivia!</h1>
 
         <div className="text-xl mb-6">Question {currentQuestionIndex + 1} of {questions.length}</div>
@@ -187,7 +187,7 @@ function SpotifyWrappedTrivia() {
             <button
               key={index}
               onClick={() => setSelectedAnswer(option)}
-              className={`p-4 w-full bg-spotifyDark text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:bg-spotifyGreenHover ${
+              className={`p-4 w-full bg-spotifyLight dark:bg-spotifyDark text-spotifyGreen dark:text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:bg-spotifyGreenHover ${
                 selectedAnswer === option ? "bg-spotifyGreen" : ""
               }`}
             >
@@ -204,7 +204,7 @@ function SpotifyWrappedTrivia() {
         <button
           onClick={handleAnswer}
           disabled={!selectedAnswer}
-          className="mt-6 py-2 px-6 bg-spotifyGreen text-black rounded-lg shadow-lg hover:bg-spotifyGreenHover transition-all duration-300 transform hover:scale-105"
+          className="mt-6 py-2 px-6 bg-spotifyGreen text-white dark:text-black rounded-lg shadow-lg hover:bg-spotifyGreenHover transition-all duration-300 transform hover:scale-105"
         >
           Submit Answer
         </button>

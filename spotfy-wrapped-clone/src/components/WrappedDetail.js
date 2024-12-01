@@ -79,10 +79,10 @@ function WrappedDetail() {
   const handleBack = () => navigate(-1);
 
   return (
-    <div className="h-screen w-screen bg-spotifyBlack text-white flex flex-col justify-center items-center relative">
+    <div className="h-screen w-screen bg-spotifyWhite dark:bg-spotifyBlack text-spotifyGreen dark:text-white flex flex-col justify-center items-center relative">
       <button
         onClick={handleBack}
-        className="absolute top-4 left-4 px-4 py-2 bg-spotifyGreen text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
+        className="absolute top-4 left-4 px-4 py-2 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
       >
         Back
       </button>
@@ -131,13 +131,13 @@ function WrappedDetail() {
       <div className="flex mt-4 space-x-4">
         <button
           onClick={handlePrev}
-          className="px-4 py-2 bg-spotifyGreen text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
+          className="px-4 py-2 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
         >
           Previous
         </button>
         <button
           onClick={handleNext}
-          className="px-4 py-2 bg-spotifyGreen text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
+          className="px-4 py-2 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
         >
           Next
         </button>
