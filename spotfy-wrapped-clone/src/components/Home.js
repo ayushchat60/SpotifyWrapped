@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SpotifyWrappedCarousel from "./SpotifyWrappedCarousel";
 
+
+
 /**
  * Home Component
  *
@@ -203,38 +205,38 @@ function Home() {
             {profileData ? `${profileData.username}'s Spotify Wrapped` : "Spotify Wrapped"}
           </h2>
           <button
-            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition"
+            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             onClick={() => generateWrapped("short")}
           >
             Short-Term Wrapped
           </button>
           <button
-            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition"
+            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             onClick={() => generateWrapped("medium")}
           >
             Medium-Term Wrapped
           </button>
           <button
-            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition"
+            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             onClick={() => generateWrapped("long")}
           >
             Long-Term Wrapped
           </button>
           <button
-            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition"
+            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             onClick={() => generateWrapped("christmas")}
           >
             Christmas Wrapped
           </button>
           <button
-            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition"
+            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             onClick={() => generateWrapped("halloween")}
           >
             Halloween Wrapped
           </button>
           <div className="flex-grow mt-4">
             <button
-              className="w-full py-2 px-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyRedHover transition"
+              className="w-full py-2 px-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyRedHover transition hover:scale-105"
               onClick={() => navigate("/game")}
             >
               Play a Game
@@ -242,7 +244,7 @@ function Home() {
           </div>
           <div className="mt-4">
             <button
-              className="w-full py-2 px-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyYellowHover transition"
+              className="w-full py-2 px-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyYellowHover transition hover:scale-105"
               onClick={() =>
                 (window.location.href = "https://jessezhang0.wixsite.com/2340team/about")
               }
@@ -262,32 +264,32 @@ function Home() {
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="px-4 py-2 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition"
+              className="px-4 py-2 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             >
               Profile
             </button>
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-spotifyLight dark:bg-spotifyDark rounded shadow-lg">
+              <div className="absolute right-0 mt-2 w-48 bg-spotifyLight dark:bg-spotifyDark rounded shadow-lg z-10 border-2">
                 <button
-                  className="w-full px-4 py-2 text-spotifyGreen dark:text-white hover:bg-spotifyGreen hover:text-white transition dark:hover:text-black transition"
+                  className="w-full px-4 py-2 text-spotifyGreen dark:text-white hover:bg-spotifyGreen hover:text-white transition dark:hover:text-black transition hover:scale-105"
                   onClick={handleLogout}
                 >
                   Log Out
                 </button>
                 <button
-                  className="w-full px-4 py-2 text-spotifyGreen dark:text-white hover:bg-spotifyGreen hover:text-white transition dark:hover:text-black transition"
+                  className="w-full px-4 py-2 text-spotifyGreen dark:text-white hover:bg-spotifyGreen hover:text-white transition dark:hover:text-black transition hover:scale-105"
                   onClick={handleLinkSpotify}
                 >
                   Link Spotify
                 </button>
                 <button
-                  className="w-full px-4 py-2 text-spotifyGreen dark:text-white hover:bg-spotifyGreen hover:text-white transition dark:hover:text-black transition"
+                  className="w-full px-4 py-2 text-spotifyGreen dark:text-white hover:bg-spotifyGreen hover:text-white transition dark:hover:text-black transition hover:scale-105"
                   onClick={handleDeleteAccount}
                 >
                   Delete Account
                 </button>
                 <button
-                  className="w-full px-4 py-2 text-spotifyGreen dark:text-white hover:bg-spotifyGreen hover:text-white transition dark:hover:text-black transition"
+                  className="w-full px-4 py-2 text-spotifyGreen dark:text-white hover:bg-spotifyGreen hover:text-white transition dark:hover:text-black transition hover:scale-105"
                   onClick={darkModeHandler}
                 >
                   Toggle {isDarkMode ? "Light" : "Dark"} Mode
