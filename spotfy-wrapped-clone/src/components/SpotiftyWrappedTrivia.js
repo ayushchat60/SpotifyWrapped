@@ -1,16 +1,41 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * SpotifyWrappedTrivia Component
+ *
+ * This component renders a trivia game based on the user's Spotify Wrapped data.
+ * It features a timer for each question, score tracking, and game-over handling.
+ *
+ * Features:
+ * - Fetches user's Spotify Wrapped data.
+ * - Generates trivia questions based on Wrapped data.
+ * - Tracks current question, user score, and remaining time.
+ * - Handles game restart and navigation to the home page.
+ *
+ * State:
+ * - wrappedData: Stores Spotify Wrapped data fetched from the API.
+ * - currentQuestionIndex: Tracks the index of the current question.
+ * - score: Tracks the user's current score.
+ * - selectedAnswer: Stores the answer selected by the user for the current question.
+ * - gameOver: Boolean indicating whether the game is over.
+ * - timer: Countdown timer for each question.
+ */
 function SpotifyWrappedTrivia() {
-  const [wrappedData, setWrappedData] = useState(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [gameOver, setGameOver] = useState(false);
-  const [timer, setTimer] = useState(10); // 10 seconds per question
+  const [wrappedData, setWrappedData] = useState(null); // Stores Wrapped data
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // Tracks current question
+  const [score, setScore] = useState(0); // Tracks user score
+  const [selectedAnswer, setSelectedAnswer] = useState(null); // Tracks selected answer
+  const [gameOver, setGameOver] = useState(false); // Indicates game over state
+  const [timer, setTimer] = useState(10); // Timer for each question (10 seconds)
   const navigate = useNavigate();
 
-  // Shuffle function to randomize the order of answers
+  /**
+   * Shuffles an array in random order.
+   *
+   * @param {Array} array - The array to shuffle.
+   * @returns {Array} A new array with shuffled elements.
+   */
   const shuffleArray = (array) => {
     let shuffledArray = [...array];
     for (let i = shuffledArray.length - 1; i > 0; i--) {
@@ -20,6 +45,7 @@ function SpotifyWrappedTrivia() {
     return shuffledArray;
   };
 
+  // Fetch Spotify Wrapped data on component mount
   useEffect(() => {
     const fetchWrappedData = async () => {
       try {
@@ -48,7 +74,11 @@ function SpotifyWrappedTrivia() {
     fetchWrappedData();
   }, []);
 
-  // Generate trivia questions based on wrapped data
+  /**
+   * Generates trivia questions based on Spotify Wrapped data.
+   *
+   * @returns {Array} An array of question objects.
+   */
   const generateQuestions = () => {
     if (!wrappedData || !wrappedData[0]) return [];
 
@@ -67,7 +97,7 @@ function SpotifyWrappedTrivia() {
 
   const questions = generateQuestions();
 
-  // Timer for each question
+  // Timer countdown for each question
   useEffect(() => {
     if (timer === 0) {
       handleAnswer();
@@ -79,7 +109,9 @@ function SpotifyWrappedTrivia() {
     }
   }, [timer, gameOver]);
 
-  // Handle the user's answer
+  /**
+   * Handles the user's answer submission and progresses to the next question.
+   */
   const handleAnswer = () => {
     if (selectedAnswer === questions[currentQuestionIndex]?.correctAnswer) {
       setScore((prevScore) => prevScore + 1);
@@ -88,12 +120,15 @@ function SpotifyWrappedTrivia() {
     setTimer(10); // Reset timer for next question
 
     if (currentQuestionIndex === questions.length - 1) {
-      setGameOver(true);
+      setGameOver(true); // End game if last question
     } else {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
     }
   };
 
+  /**
+   * Restarts the trivia game, resetting all state variables.
+   */
   const handleRestart = () => {
     setScore(0);
     setCurrentQuestionIndex(0);
