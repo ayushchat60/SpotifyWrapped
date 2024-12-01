@@ -239,7 +239,9 @@ function Home() {
           <div className="mt-4">
             <button
               className="w-full py-2 px-4 bg-spotifyGreen text-black font-bold rounded hover:bg-spotifyYellowHover transition"
-              onClick={() => navigate("/contact")}
+              onClick={() =>
+                (window.location.href = "https://jessezhang0.wixsite.com/2340team/about")
+              }
             >
               Contact Developers
             </button>
