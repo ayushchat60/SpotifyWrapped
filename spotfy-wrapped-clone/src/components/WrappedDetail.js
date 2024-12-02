@@ -28,13 +28,51 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 function WrappedDetail() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { wrapped_id } = useParams(); // Extract wrapped_id from URL
+  const { id } = useParams(); // Extract wrapped_id from URL
   const { artists } = location.state || {};
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentArtist, setCurrentArtist] = useState(artists ? artists[currentIndex] : {});
   const [audioRef, setAudioRef] = useState(null); // Ref for audio element
   const [audioLoaded, setAudioLoaded] = useState(false); // Tracks audio load state
   const [trackId, setTrackId] = useState(null); // ID for top song preview
+
+  // Delete the currect wrap
+  const delete_wrap = async () => {
+
+    console.log("Token:", localStorage.getItem("accessToken")); // Log the token
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      alert("You must be logged in to delete your account.");
+      return;
+    }
+
+    console.log("Wrapped ID:", id); // Log the ID
+    if (!id) {
+      alert("Wrapped ID is undefined.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}wrapped-history/${Number(id)}/delete/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        alert("Wrap deleted successfully.");
+        navigate("/");
+      } else {
+        alert("Failed to delete wrap.");
+      }
+    } catch (error) {
+      console.error("Error deleting wrap:", error);
+      alert("An error occurred while deleting the wrap.");
+    }
+  };
 
   // Update trackId based on the current artist
   useEffect(() => {
@@ -85,6 +123,13 @@ function WrappedDetail() {
         className="absolute top-4 left-4 px-4 py-2 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
       >
         Back
+      </button>
+
+      <button
+        onClick={delete_wrap}
+        className="absolute top-4 right-4 px-4 py-2 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
+      >
+        Delete Wrap
       </button>
 
       <AnimatePresence mode="wait">
