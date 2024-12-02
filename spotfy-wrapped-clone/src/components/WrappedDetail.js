@@ -141,7 +141,7 @@ function WrappedDetail() {
           transition={{ duration: 0.5 }}
           className="w-3/4 max-w-3xl p-8 bg-gradient-to-r from-spotifyGreen via-spotifyBlue to-spotifyPurple rounded-lg shadow-lg text-center"
         >
-          <div className="w-72 h-72 mx-auto mb-4 overflow-hidden rounded-lg shadow-md">
+          <div className="w-50 h-50 mx-auto mb-4 overflow-hidden rounded-lg shadow-md md: sm:w-50 sm:h-50 md:w-72 md:h-72 lg:w-72 lg:h-72">
             <img
               src={currentArtist.images?.[0]?.url || "https://via.placeholder.com/300"}
               alt={currentArtist.name}
