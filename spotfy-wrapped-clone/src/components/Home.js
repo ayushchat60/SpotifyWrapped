@@ -199,7 +199,7 @@ function Home() {
   return (
     <div className="flex h-screen w-screen bg-spotifyWhite dark:bg-spotifyBlack text-white dark:text-spotifyBlack overflow-x-auto overflow-y-auto">
       {/* Sidebar */}
-      <aside className="w-64 bg-spotifyLight dark:bg-spotifyDark p-4 flex flex-col w-28 sm:w-20 md:w-64 lg:w-64">
+      <aside className="w-32 bg-spotifyLight dark:bg-spotifyDark p-4 flex flex-col sm:w-32 md:w-64 lg:w-64">
         <div>
           <h2 className="text-xl font-bold text-spotifyGreen mb-6">
             {profileData ? `${profileData.username}'s Spotify Wrapped` : "Spotify Wrapped"}
