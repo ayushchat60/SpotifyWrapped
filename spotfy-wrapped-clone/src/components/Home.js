@@ -197,9 +197,9 @@ function Home() {
   };
 
   return (
-    <div className="flex h-screen w-screen bg-spotifyWhite dark:bg-spotifyBlack text-white dark:text-spotifyBlack overflow-hidden">
+    <div className="flex h-screen w-screen bg-spotifyWhite dark:bg-spotifyBlack text-white dark:text-spotifyBlack overflow-x-auto overflow-y-auto">
       {/* Sidebar */}
-      <aside className="w-64 bg-spotifyLight dark:bg-spotifyDark flex-shrink-0 p-4 flex flex-col">
+      <aside className="w-64 bg-spotifyLight dark:bg-spotifyDark flex-shrink-0 p-4 flex flex-col w-40 sm:w-20 md:w-64 lg:w-64">
         <div>
           <h2 className="text-xl font-bold text-spotifyGreen mb-6">
             {profileData ? `${profileData.username}'s Spotify Wrapped` : "Spotify Wrapped"}
@@ -256,7 +256,7 @@ function Home() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 h-screen overflow-y-auto flex flex-col">
         <nav className="bg-spotifyLight dark:bg-spotifyDark p-4 flex justify-between items-center">
           <h1 className="text-xl font-bold text-spotifyGreen">
             {profileData ? `Welcome, ${profileData.username}` : "Your Wrapped Dashboard"}
@@ -300,7 +300,7 @@ function Home() {
         </nav>
 
         {/* Spotify Wrapped Carousel */}
-        <div className="flex-1 p-8 overflow-y-auto">
+        <div className="flex-1 p-4 p-8 overflow-x-auto overflow-y-auto">
           <SpotifyWrappedCarousel
             slides={slides}
             onSlideClick={(slide) => {
