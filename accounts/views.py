@@ -5,7 +5,7 @@ Spotify authentication, and handling Spotify Wrapped data using Django REST Fram
 # pylint: disable=E0307,W3101,E1101,W0631,W0719,W0718,W0611,W0622
 import logging
 import os
-from datetime import timedelta
+from datetime import timedelta, datetime
 from urllib.parse import urlencode
 
 import requests
@@ -200,7 +200,6 @@ class SpotifyLinkCheckView(APIView):
         return Response({"linked": bool(spotify_token)}, status=200)
 
     
-
 class SpotifyWrappedDataView(APIView):
     """
     Fetches and stores the user's Spotify wrapped data (top artists and tracks)
@@ -208,7 +207,7 @@ class SpotifyWrappedDataView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, term): # pylint: disable=unused-argument
+    def get(self, request, term): 
         # Validate term
         if term not in ['short', 'medium', 'long', 'christmas', 'halloween']:
             return Response({"error": "Invalid term"}, status=status.HTTP_400_BAD_REQUEST)
@@ -234,13 +233,13 @@ class SpotifyWrappedDataView(APIView):
             'short': 'short_term',
             'medium': 'medium_term',
             'long': 'long_term',
-            'christmas': 'long_term',  # You can use 'long_term' as fallback
-            'halloween': 'medium_term',  # Use 'long_term' as fallback
+            'christmas': self.get_christmas_time_range(),  # Custom function to get the Christmas time range
+            'halloween': self.get_halloween_time_range(),  # Custom function to get the Halloween time range
         }
 
-        # Determine which playlists or data to fetch for special terms
+        # Determine the correct API URL based on the term
         if term == 'christmas' or term == 'halloween':
-            # Use specific seasonal playlist logic for Christmas and Halloween
+            # These terms use specific seasonal playlists or time ranges
             artists_api_url = f"https://api.spotify.com/v1/me/top/artists?time_range={time_range_mapping[term]}&limit=10"
             tracks_api_url = f"https://api.spotify.com/v1/me/top/tracks?time_range={time_range_mapping[term]}&limit=50"
         else:
@@ -335,7 +334,25 @@ class SpotifyWrappedDataView(APIView):
                 "artist_details": artists_response.json(),
                 "track_details": tracks_response.json()
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+    
+    def get_christmas_time_range(self):
+        """
+        Defines the time range for Christmas (e.g., from Dec 1 to Dec 31).
+        This can be customized to fit the specific date range you'd like to fetch.
+        """
+        current_date = datetime.now()
+        if current_date.month == 12:
+            return 'short_term'  # Default long-term range; can adjust if needed
+        return 'long_term'  # Fallback
+
+    def get_halloween_time_range(self):
+        """
+        Defines the time range for Halloween (e.g., from Oct 1 to Oct 31).
+        """
+        current_date = datetime.now()
+        if current_date.month == 10:
+            return 'short_term'  # Example, could adjust as necessary
+        return 'medium_term'  # Fallback
 class WrappedHistoryView(APIView):
     """
     Retrieves the Spotify wrapped history for the authenticated user.
