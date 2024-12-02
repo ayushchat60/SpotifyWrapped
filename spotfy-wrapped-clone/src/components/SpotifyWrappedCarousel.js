@@ -1,6 +1,7 @@
 import React from "react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import { motion } from "framer-motion";
 
 /**
  * SpotifyWrappedCarousel Component
@@ -30,20 +31,26 @@ function SpotifyWrappedCarousel({ slides, onSlideClick }) {
   return (
     <Carousel responsive={responsive}>
       {slides.map((slide) => (
-        <div
-          key={slide.id} // Use a unique key for each slide
+        <motion.div
+          key={slide.id}
           className="p-4 cursor-pointer"
           onClick={() => onSlideClick(slide)}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5 }}
         >
-          <img
-            src={slide.image}
-            alt={slide.title}
-            className="rounded-lg shadow-md"
-          />
+          <div className="w-full h-80 overflow-hidden rounded-lg shadow-lg hover:scale-105">
+            <img
+              src={slide.image}
+              alt={slide.title}
+              className="w-full h-full object-contain"
+            />
+          </div>
           <h3 className="mt-2 text-center font-bold text-spotifyGreen">
             {slide.title}
           </h3>
-        </div>
+        </motion.div>
       ))}
     </Carousel>
   );
