@@ -199,44 +199,44 @@ function Home() {
   return (
     <div className="flex h-screen w-screen bg-spotifyWhite dark:bg-spotifyBlack text-white dark:text-spotifyBlack overflow-x-auto overflow-y-auto">
       {/* Sidebar */}
-      <aside className="w-64 bg-spotifyLight dark:bg-spotifyDark flex-shrink-0 p-4 flex flex-col w-40 sm:w-20 md:w-64 lg:w-64">
+      <aside className="w-64 bg-spotifyLight dark:bg-spotifyDark p-4 flex flex-col w-28 sm:w-20 md:w-64 lg:w-64">
         <div>
           <h2 className="text-xl font-bold text-spotifyGreen mb-6">
             {profileData ? `${profileData.username}'s Spotify Wrapped` : "Spotify Wrapped"}
           </h2>
           <button
-            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
+            className="w-full py-2 px-3 mb-4 bg-spotifyGreen text-sm text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             onClick={() => generateWrapped("short")}
           >
             Short-Term Wrapped
           </button>
           <button
-            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
+            className="w-full py-2 px-3 mb-4 bg-spotifyGreen text-sm text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             onClick={() => generateWrapped("medium")}
           >
             Medium-Term Wrapped
           </button>
           <button
-            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
+            className="w-full py-2 px-3 mb-4 bg-spotifyGreen text-sm text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             onClick={() => generateWrapped("long")}
           >
             Long-Term Wrapped
           </button>
           <button
-            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
+            className="w-full py-2 px-2.5 mb-4 bg-spotifyGreen text-sm text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             onClick={() => generateWrapped("christmas")}
           >
             Christmas Wrapped
           </button>
           <button
-            className="w-full py-2 px-4 mb-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
+            className="w-full py-2 px-3 mb-4 bg-spotifyGreen text-sm text-white dark:text-black font-bold rounded hover:bg-spotifyGreenHover transition hover:scale-105"
             onClick={() => generateWrapped("halloween")}
           >
             Halloween Wrapped
           </button>
           <div className="flex-grow mt-4">
             <button
-              className="w-full py-2 px-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyRedHover transition hover:scale-105"
+              className="w-full py-2 px-2.5 bg-spotifyGreen text-sm text-white dark:text-black font-bold rounded hover:bg-spotifyRedHover transition hover:scale-105"
               onClick={() => navigate("/game")}
             >
               Play a Game
@@ -244,7 +244,7 @@ function Home() {
           </div>
           <div className="mt-4">
             <button
-              className="w-full py-2 px-4 bg-spotifyGreen text-white dark:text-black font-bold rounded hover:bg-spotifyYellowHover transition hover:scale-105"
+              className="w-full py-2 px-3 bg-spotifyGreen text-xs text-white dark:text-black font-bold rounded hover:bg-spotifyYellowHover transition hover:scale-105"
               onClick={() =>
                 (window.location.href = "https://jessezhang0.wixsite.com/2340team/about")
               }
