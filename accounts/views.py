@@ -2,7 +2,7 @@
 This module contains API views and helper functions for managing user accounts,
 Spotify authentication, and handling Spotify Wrapped data using Django REST Framework.
 """
-# pylint: disable=E0307,W3101,E1101,W0631,W0719,W0718,W0611
+# pylint: disable=E0307,W3101,E1101,W0631,W0719,W0718,W0611,W0622
 import logging
 import os
 from datetime import timedelta
