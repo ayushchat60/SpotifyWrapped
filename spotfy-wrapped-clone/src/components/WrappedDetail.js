@@ -36,7 +36,7 @@ function WrappedDetail() {
   const [audioLoaded, setAudioLoaded] = useState(false); // Tracks audio load state
   const [trackId, setTrackId] = useState(null); // ID for top song preview
 
-  // Delete the currect wrap
+  // Delete the current wrap
   const delete_wrap = async () => {
 
     console.log("Token:", localStorage.getItem("accessToken")); // Log the token
