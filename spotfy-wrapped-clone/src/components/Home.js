@@ -127,7 +127,7 @@ function Home() {
 
         setSlides((prevSlides) => [...prevSlides, newSlide]);
         alert(`Generated ${term}-term Wrapped successfully!`);
-        navigate("/");
+        window.location.reload();
       } else {
         alert("Failed to generate Wrapped.");
       }
