@@ -2,7 +2,7 @@
 This module contains API views and helper functions for managing user accounts,
 Spotify authentication, and handling Spotify Wrapped data using Django REST Framework.
 """
-# pylint: disable=E0307,W3101,E1101,W0631,W0719,W0718,W0611
+# pylint: disable=E0307,W3101,E1101,W0631,W0719,W0718,W0611,W0622
 import logging
 import os
 from datetime import timedelta
@@ -436,3 +436,23 @@ def delete_account(request):  # pylint: disable=unused-argument
         return Response({"message": "User account deleted successfully."}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": f"Failed to delete account: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_wrap(request, id):  # pylint: disable=unused-argument
+    """
+    Deletes the authenticated user's wrap.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        Response: A success message or an error message in case of failure.
+    """
+    wrap = WrappedHistory.objects.get(pk=id)
+
+    try:
+        wrap.delete()
+        return Response({"message": "Wrap deleted successfully."}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": f"Failed to delete wrap: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
