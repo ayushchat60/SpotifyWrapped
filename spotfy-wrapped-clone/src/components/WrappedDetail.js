@@ -134,10 +134,10 @@ function WrappedDetail() {
 
       <AnimatePresence mode="wait">
         <motion.div
-          key={currentArtist.id}
-          initial={{ opacity: 0, x: 100 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -100 }}
+          key={currentArtist.id || currentIndex}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.5 }}
           className="w-3/4 max-w-3xl p-8 bg-gradient-to-r from-spotifyGreen via-spotifyBlue to-spotifyPurple rounded-lg shadow-lg text-center"
         >
